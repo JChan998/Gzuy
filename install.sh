@@ -200,7 +200,7 @@ install_XrayR() {
 
     # Writing json
     echo "Đang cố gắng ghi tệp cấu hình ..."
-    wget https://raw.githubusercontent.com/pntuanhai/XrayR-JC/main/config.yml -O /etc/XrayR/config.yml
+    wget https://raw.githubusercontent.com/JChan998/Gzuy/main/config.yml -O /etc/XrayR/config.yml
     sed -i "s/NodeID:.*/NodeID: ${node_id}/g" /etc/XrayR/config.yml
     sed -i "s/NodeType:.*/NodeType: ${node_type}/g" /etc/XrayR/config.yml
     echo ""
