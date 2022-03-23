@@ -16,7 +16,7 @@ Nodes:
   -
     PanelType: "V2board" # Panel type: SSpanel, V2board, PMpanel, Proxypanel
     ApiConfig:
-      ApiHost: "http://datathaga.com"
+      ApiHost: "https://datathaga.com"
       ApiKey: "4fCdmbVBjnVUByVC"
       NodeID: 
       NodeType: # Node type: V2ray, Trojan, Shadowsocks, Shadowsocks-Plugin
