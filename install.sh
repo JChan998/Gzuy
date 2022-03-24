@@ -292,5 +292,4 @@ install_XrayR $1
 echo -e "Đã lưu cấu hình thành công, đang bắt đầu khởi động ${green} AikoCute XrayR ${last_version}${plain}"
 
 
-
 XrayR start
