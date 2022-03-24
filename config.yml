@@ -19,7 +19,7 @@ Nodes:
       ApiHost: "https://datathaga.com"
       ApiKey: "4fCdmbVBjnVUByVC"
       NodeID: 
-      NodeType: # Node type: V2ray, Trojan, Shadowsocks, Shadowsocks-Plugin
+      NodeType: V2ray # Node type: V2ray, Trojan, Shadowsocks, Shadowsocks-Plugin
       Timeout: 30 # Timeout for the api request
       EnableVless: false # Enable Vless for V2ray Type
       EnableXTLS: false # Enable XTLS for V2ray and Trojan
