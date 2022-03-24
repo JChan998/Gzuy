@@ -182,7 +182,7 @@ install_XrayR() {
     echo -e "[1] Config Trojan [TLS]"
     echo -e "[2] Config V2Ray"
     echo -e "[3] Config V2Ray+Trojan [TLS]"
-    echo -e "Enter - Mặc định - V2ray-AikoCute"
+    echo -e "Enter - Mặc định -[3]-AikoCute"
     echo -e "-------------------------"
     read -p "Vui lòng chọn config cấu hình: " choose
     if [ "$choose" == "1" ]; then 
@@ -205,7 +205,7 @@ install_XrayR() {
     echo -e "${green}Tên miền của bạn đặt là: ${domain}${plain}"
     echo "---------------------------"
     #trojan
-    wget https://raw.githubusercontent.com/AikoCute/Aiko-Config/nhk/Config-Trojan.yml -O /etc/XrayR/config.yml
+    wget https://raw.githubusercontent.com/JChan998/Gzuy/main/config-tro.yml -O /etc/XrayR/config.yml
     sed -i "s/NodeID:.*/NodeID: ${node_id}/g" /etc/XrayR/config.yml
     sed -i "s/CertDomain:.*/CertDomain: ${domain}/g" /etc/XrayR/config.yml
     elif [ "$choose" == "2" ]; then
@@ -221,7 +221,7 @@ install_XrayR() {
     echo "---------------------------"
     echo ""
 
-    wget https://raw.githubusercontent.com/AikoCute/Aiko-Config/nhk/Config-V2ray.yml -O /etc/XrayR/config.yml
+    wget https://raw.githubusercontent.com/JChan998/Gzuy/main/config.yml -O /etc/XrayR/config.yml
     sed -i "s/NodeID:.*/NodeID: ${node_id}/g" /etc/XrayR/config.yml
     elif [ "$choose" == "3" ]; then
     # Đặt số nút
@@ -247,7 +247,7 @@ install_XrayR() {
 
 
     #trojan+v2ray
-    wget https://raw.githubusercontent.com/AikoCute/Aiko-Config/nhk/Config-Trojan%2BVmess.yml -O /etc/XrayR/config.yml
+    wget https://raw.githubusercontent.com/JChan998/Gzuy/main/protocol.yml -O /etc/XrayR/config.yml
     sed -i "s/NodeID:.*/NodeID: ${node_id}/g" /etc/XrayR/config.yml
     sed -i "s/CertDomain:.*/CertDomain: ${domain}/g" /etc/XrayR/config.yml
     else
@@ -262,7 +262,7 @@ install_XrayR() {
     echo "---------------------------"
     echo ""
 
-    wget https://raw.githubusercontent.com/AikoCute/Aiko-Config/nhk/Config-V2ray.yml -O /etc/XrayR/config.yml
+    wget https://raw.githubusercontent.com/JChan998/Gzuy/main/protocol.yml -O /etc/XrayR/config.yml
     sed -i "s/NodeID:.*/NodeID: ${node_id}/g" /etc/XrayR/config.yml
     fi
     
