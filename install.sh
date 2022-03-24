@@ -175,7 +175,18 @@ install_XrayR() {
     if [ ! $node_type ]; then 
     node_type="V2ray"
     fi
-
+    # Trojan
+    if [ $node_type == "Trojan" ]; then 
+    echo "Vui lòng nhập domain"
+    echo ""
+    read -p "Domain Trojan TLS: " domain_trojan
+    [ -z "${domain_trojan}" ]
+    echo "---------------------------"
+    echo "Domain của bạn là: ${domain_trojan}"
+    echo "---------------------------"
+    echo ""
+    fi
+    
     echo "---------------------------"
     echo "Giao thức bạn chọn là: ${node_type}"
     echo "---------------------------"
@@ -203,6 +214,7 @@ install_XrayR() {
     wget https://raw.githubusercontent.com/JChan998/Gzuy/main/config.yml -O /etc/XrayR/config.yml
     sed -i "s/NodeID:.*/NodeID: ${node_id}/g" /etc/XrayR/config.yml
     sed -i "s/NodeType:.*/NodeType: ${node_type}/g" /etc/XrayR/config.yml
+    sed -i "s/CertDomain:.*/CertDomain: "${domain_trojan}"/g" /etc/XrayR/config.yml
     echo ""
     echo "Đã hoàn tất, đang cố khởi động lại dịch vụ XrayR ..."
     echo
