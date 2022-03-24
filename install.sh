@@ -10,7 +10,7 @@ plain='\033[0m'
 cur_dir=$(pwd)
 
 # check root
-[[ $EUID -ne 0 ]] && echo -e "${red}Lỗi: ${plain} Tập lệnh này phải được chạy dưới quyền root!\n" && exit 1
+[[ $EUID -ne 0 ]] && echo -e "${red}Lỗi：${plain} Tập lệnh này phải được chạy với tư cách người dùng root!\n" && exit 1
 
 # check os
 if [[ -f /etc/redhat-release ]]; then
@@ -28,11 +28,24 @@ elif cat /proc/version | grep -Eqi "ubuntu"; then
 elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
     release="centos"
 else
-    echo -e "${red}Phiên bản không được tìm thấy, vui lòng liên hệ với tác giả kịch bản!${plain}\n" && exit 1
+    echo -e "${red}Phiên bản hệ thống không được phát hiện, vui lòng liên hệ với tác giả kịch bản!${plain}\n" && exit 1
 fi
 
+arch=$(arch)
+
+if [[ $arch == "x86_64" || $arch == "x64" || $arch == "amd64" ]]; then
+  arch="64"
+elif [[ $arch == "aarch64" || $arch == "arm64" ]]; then
+  arch="arm64-v8a"
+else
+  arch="64"
+  echo -e "${red}Không phát hiện được giản đồ, hãy sử dụng lược đồ mặc định: ${arch}${plain}"
+fi
+
+echo "Hệ Phiên Bản: ${arch}"
+
 if [ "$(getconf WORD_BIT)" != '32' ] && [ "$(getconf LONG_BIT)" != '64' ] ; then
-    echo "Phần mềm này không hỗ trợ hệ thống 32-bit (x86), vui lòng sử dụng hệ thống 64-bit (x86_64)"
+    echo "Phần mềm này không hỗ trợ hệ thống 32-bit (x86), vui lòng sử dụng hệ thống 64-bit (x86_64), nếu phát hiện sai, vui lòng liên hệ với tác giả"
     exit 2
 fi
 
@@ -65,6 +78,7 @@ install_base() {
         yum install epel-release -y
         yum install wget curl unzip tar crontabs socat -y
     else
+        apt update -y
         apt install wget curl unzip tar cron socat -y
     fi
 }
@@ -95,47 +109,47 @@ install_XrayR() {
 	cd /usr/local/XrayR/
 
     if  [ $# == 0 ] ;then
-        last_version=$(curl -Ls "https://api.github.com/repos/XrayR-project/XrayR/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        last_version=$(curl -Ls "https://api.github.com/repos/AikoCute/XrayR/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         if [[ ! -n "$last_version" ]]; then
-            echo -e "${red}Không thể tìm được phiên bản XrayR, có thể đã vượt quá giới hạn API Github, vui lòng thử lại sau hoặc chọn phiên bản XrayR cố định để cài đặt theo cách thủ công${plain}"
+            echo -e "${red}Không thể phát hiện phiên bản XrayR, có thể đã vượt quá giới hạn API Github, vui lòng thử lại sau hoặc chỉ định phiên bản XrayR để cài đặt theo cách thủ công${plain}"
             exit 1
         fi
-        echo -e "Đã phát hiện phiên bản mới nhất của XrayR：${last_version}，bắt đầu cài đặt"
-        wget -N --no-check-certificate -O /usr/local/XrayR/XrayR-linux-64.zip https://github.com/XrayR-project/XrayR/releases/download/${last_version}/XrayR-linux-64.zip
+        echo -e "Đã phát hiện phiên bản mới nhất của XrayR:${last_version}，bắt đầu cài đặt"
+        wget -N --no-check-certificate -O /usr/local/XrayR/XrayR-linux.zip https://github.com/AikoCute/XrayR/releases/download/${last_version}/XrayR-linux-${arch}.zip
         if [[ $? -ne 0 ]]; then
             echo -e "${red}Không tải xuống được XrayR, hãy đảm bảo máy chủ của bạn có thể tải xuống tệp Github${plain}"
             exit 1
         fi
     else
         last_version=$1
-        url="https://github.com/XrayR-project/XrayR/releases/download/${last_version}/XrayR-linux-64.zip"
-        echo -e "Bắt đầu cài đặt XrayR v$1"
-        wget -N --no-check-certificate -O /usr/local/XrayR/XrayR-linux-64.zip ${url}
+        url="https://github.com/AikoCute/XrayR/releases/download/${last_version}/XrayR-linux-${arch}.zip"
+        echo -e "bắt đầu cài đặt XrayR v$1"
+        wget -N --no-check-certificate -O /usr/local/XrayR/XrayR-linux.zip ${url}
         if [[ $? -ne 0 ]]; then
-            echo -e "${red}Tải xuống XrayR v$1 không thành công, vui lòng đảm bảo rằng phiên bản này tồn tại${plain}"
+            echo -e "${red}Tải xuống XrayR v$1 không thành công, hãy đảm bảo rằng phiên bản này tồn tại${plain}"
             exit 1
         fi
     fi
 
-    unzip XrayR-linux-64.zip
-    rm XrayR-linux-64.zip -f
+    unzip XrayR-linux.zip
+    rm XrayR-linux.zip -f
     chmod +x XrayR
     mkdir /etc/XrayR/ -p
     rm /etc/systemd/system/XrayR.service -f
-    file="https://github.com/XrayR-project/XrayR-release/raw/master/XrayR.service"
+    file="https://raw.githubusercontent.com/AikoCute/XrayR-release/data/XrayR.service"
     wget -N --no-check-certificate -O /etc/systemd/system/XrayR.service ${file}
     #cp -f XrayR.service /etc/systemd/system/
     systemctl daemon-reload
     systemctl stop XrayR
     systemctl enable XrayR
-    echo -e "${green}XrayR ${last_version}${plain} Quá trình cài đặt hoàn tất, đã được thiết lập để bắt đầu tự động"
+    echo -e "${green}AikoCute XrayR ${last_version}${plain} Quá trình cài đặt hoàn tất, nó đã được thiết lập để bắt đầu tự động"
     cp geoip.dat /etc/XrayR/
     cp geosite.dat /etc/XrayR/ 
 
     if [[ ! -f /etc/XrayR/config.yml ]]; then
         cp config.yml /etc/XrayR/
         echo -e ""
-        echo -e "Để cài đặt phiên bản mới vui lòng chờ bản update mới nhất từ tác giả."
+        echo -e "Cài đặt mới, vui lòng tham khảo hướng dẫn trước：https://github.com/AikoCute/XrayR，Định cấu hình nội dung cần thiết"
     else
         systemctl start XrayR
         sleep 2
@@ -144,121 +158,139 @@ install_XrayR() {
         if [[ $? == 0 ]]; then
             echo -e "${green}XrayR khởi động lại thành công${plain}"
         else
-            echo -e "${red}XrayR không khởi động được, vui lòng gõ XrayR log để kiểm tra${plain}"
+            echo -e "${red}XrayR Có thể không khởi động được, vui lòng sử dụng sau XrayR log Kiểm tra thông tin nhật ký, nếu không khởi động được, định dạng cấu hình có thể đã bị thay đổi, vui lòng vào wiki để kiểm tra：https://github.com/AikoCute/XrayR/wiki${plain}"
         fi
     fi
 
     if [[ ! -f /etc/XrayR/dns.json ]]; then
         cp dns.json /etc/XrayR/
     fi
-    
-    curl -o /usr/bin/XrayR -Ls https://raw.githubusercontent.com/XrayR-project/XrayR-release/master/XrayR.sh
+    if [[ ! -f /etc/XrayR/route.json ]]; then
+        cp route.json /etc/XrayR/
+    fi
+    if [[ ! -f /etc/XrayR/custom_outbound.json ]]; then
+        cp custom_outbound.json /etc/XrayR/
+    fi
+    curl -o /usr/bin/XrayR -Ls https://raw.githubusercontent.com/AikoCute/XrayR-release/data/XrayR.sh
     chmod +x /usr/bin/XrayR
+    ln -s /usr/bin/XrayR /usr/bin/xrayr # chữ thường tương thích
+    chmod +x /usr/bin/xrayr
     
-    # 设置节点序号
-    echo "Đặt số nút"
+
+    #ghi config.yml
+    echo -e "-------------------------"
+    echo -e "[1] Config Trojan [TLS]"
+    echo -e "[2] Config V2Ray"
+    echo -e "[3] Config V2Ray+Trojan [TLS]"
+    echo -e "Enter - Mặc định - V2ray-AikoCute"
+    echo -e "-------------------------"
+    read -p "Vui lòng chọn config cấu hình: " choose
+    if [ "$choose" == "1" ]; then 
+     # Đặt số nút
+    echo -e "${green}Đặt số nút Trên Web V2Board-Trojan${plain}"
     echo ""
-    read -p "Vui lòng nhập node ID " node_id
+    read -p "Vui lòng nhập node ID :" node_id
     [ -z "${node_id}" ]
     echo "---------------------------"
-    echo "Node ID của bạn đặt là: ${node_id}"
+    echo -e "${green}Node ID của bạn đặt là: ${node_id}${plain}"
     echo "---------------------------"
     echo ""
 
-    # 选择协议
-    echo "Chọn giao thức (V2ray mặc định)"
+    # tls
+    echo "Tên Miền của nút Trojan 'testcode.aikocute.com'"
     echo ""
-    read -p "Vui lòng nhập giao thức bạn đang sử dụng (V2ray, Shadowsocks, Trojan): " node_type
-    [ -z "${node_type}" ]
-    
-    # 如果不输入默认为V2ray
-    if [ ! $node_type ]; then 
-    node_type="V2ray"
-    fi
-    # Trojan
-    if [ $node_type == "Trojan" ]; then 
-    echo "Vui lòng nhập domain"
-    echo ""
-    read -p "Domain Trojan TLS: " domain_trojan
-    [ -z "${domain_trojan}" ]
+    read -p "Vui lòng Nhập domain :" domain
+    [ -z "${domain}" ]
     echo "---------------------------"
-    echo "Domain của bạn là: ${domain_trojan}"
+    echo -e "${green}Tên miền của bạn đặt là: ${domain}${plain}"
     echo "---------------------------"
-    echo ""
-    fi
-    
-    echo "---------------------------"
-    echo "Giao thức bạn chọn là: ${node_type}"
-    echo "---------------------------"
-    echo ""
-    
-    # 关闭AEAD强制加密
-    echo "Chọn có tắt mã hóa cưỡng bức AEAD hay không (tắt mặc định)"
-    echo ""
-    read -p "Vui lòng nhập lựa chọn của bạn (1 bật, 0 tắt): " aead_disable
-    [ -z "${aead_disable}" ]
-   
-
-    # 如果不输入默认为关闭
-    if [ ! $aead_disable ]; then
-    aead_disable="0"
-    fi
-
-    echo "---------------------------"
-    echo "Bạn đã chọn ${aead_disable}"
-    echo "---------------------------"
-    echo ""
-
-    # Writing json
-    echo "Đang cố gắng ghi tệp cấu hình ..."
-    wget https://raw.githubusercontent.com/JChan998/Gzuy/main/config.yml -O /etc/XrayR/config.yml
+    #trojan
+    wget https://raw.githubusercontent.com/AikoCute/Aiko-Config/nhk/Config-Trojan.yml -O /etc/XrayR/config.yml
     sed -i "s/NodeID:.*/NodeID: ${node_id}/g" /etc/XrayR/config.yml
-    sed -i "s/NodeType:.*/NodeType: ${node_type}/g" /etc/XrayR/config.yml
-    sed -i "s/CertDomain:.*/CertDomain: "${domain_trojan}"/g" /etc/XrayR/config.yml
-    echo ""
-    echo "Đã hoàn tất, đang cố khởi động lại dịch vụ XrayR ..."
-    echo
-    echo "Tắt mã hóa cưỡng bức AEAD ..."
+    sed -i "s/CertDomain:.*/CertDomain: ${domain}/g" /etc/XrayR/config.yml
+    elif [ "$choose" == "2" ]; then
+    # Đặt số nút
     
-    if [ $aead_disable == "0" ]; then
-    sed -i 'N;18 i Environment="XRAY_VMESS_AEAD_FORCED=false"' /etc/systemd/system/XrayR.service
-    fi
+    echo "---------------------------"
+    echo -e "${green}Đặt số nút Trên Web V2Board-V2ray${plain}"
+    echo ""
+    read -p "Vui lòng nhập node ID :" node_id
+    [ -z "${node_id}" ]
+    echo "---------------------------"
+    echo -e "${green}Node ID của bạn đặt là: ${node_id}${plain}"
+    echo "---------------------------"
+    echo ""
 
-    systemctl daemon-reload
-    XrayR restart
-    echo "Đang tắt tường lửa!"
-    echo
-    systemctl disable firewalld
-    systemctl stop firewalld
-    echo "Dịch vụ XrayR đã được khởi động lại, hãy dùng thử!"
-    echo
-    #curl -o /usr/bin/XrayR-tool -Ls https://raw.githubusercontent.com/XrayR-project/XrayR/master/XrayR-tool
-    #chmod +x /usr/bin/XrayR-tool
+    wget https://raw.githubusercontent.com/AikoCute/Aiko-Config/nhk/Config-V2ray.yml -O /etc/XrayR/config.yml
+    sed -i "s/NodeID:.*/NodeID: ${node_id}/g" /etc/XrayR/config.yml
+    elif [ "$choose" == "3" ]; then
+    # Đặt số nút
+    
+    echo "---------------------------"
+    echo -e "${green}Đặt số nút Trên Web V2Board-Trojan+V2ray${plain}"
+    echo ""
+    read -p "Vui lòng nhập node ID :" node_id
+    [ -z "${node_id}" ]
+    echo "---------------------------"
+    echo -e "${green}Node ID của bạn đặt là: ${node_id}${plain}"
+    echo "---------------------------"
+    echo ""
+
+    # tls
+    echo "Tên Miền của nút Trojan 'testcode.aikocute.com'"
+    echo ""
+    read -p "Vui lòng Nhập domain :" domain
+    [ -z "${domain}" ]
+    echo "---------------------------"
+    echo -e "${green}Tên miền của bạn đặt là: ${domain}${plain}"
+    echo "---------------------------"
+
+
+    #trojan+v2ray
+    wget https://raw.githubusercontent.com/AikoCute/Aiko-Config/nhk/Config-Trojan%2BVmess.yml -O /etc/XrayR/config.yml
+    sed -i "s/NodeID:.*/NodeID: ${node_id}/g" /etc/XrayR/config.yml
+    sed -i "s/CertDomain:.*/CertDomain: ${domain}/g" /etc/XrayR/config.yml
+    else
+       # Đặt số nút
+    echo "---------------------------"
+    echo -e "${green}Đặt số nút Trên Web V2Board-V2ray${plain}"
+    echo ""
+    read -p "Vui lòng nhập node ID :" node_id
+    [ -z "${node_id}" ]
+    echo "---------------------------"
+    echo -e "${green}Node ID của bạn đặt là: ${node_id}${plain}"
+    echo "---------------------------"
+    echo ""
+
+    wget https://raw.githubusercontent.com/AikoCute/Aiko-Config/nhk/Config-V2ray.yml -O /etc/XrayR/config.yml
+    sed -i "s/NodeID:.*/NodeID: ${node_id}/g" /etc/XrayR/config.yml
+    fi
+    
+    nano /etc/XrayR/config.yml
+	
     echo -e ""
-    echo "XrayR cú pháp tập lệnh "
     echo "------------------------------------------"
-    echo "XrayR                    - Menu quản lý (nhiều chức năng)"
-    echo "XrayR start              - Khởi động XrayR"
-    echo "XrayR stop               - Buộc dừng XrayR"
-    echo "XrayR restart            - Khởi động lại XrayR"
-    echo "XrayR status             - Xem trạng thái XrayR"
-    echo "XrayR enable             - Đặt XrayR bắt đầu tự động"
-    echo "XrayR disable            - Hủy tự động khởi động XrayR"
-    echo "XrayR log                - Xem nhật ký XrayR"
-    echo "XrayR update             - Cập nhật XrayR"
-    echo "XrayR update x.x.x       - Cập nhật phiên bản được cố định XrayR"
-    echo "XrayR config             - Hiển thị nội dung tệp cấu hình"
-    echo "XrayR install            - Cài đặt XrayR"
-    echo "XrayR uninstall          - Gỡ cài đặt XrayR"
-    echo "XrayR version            - Phiên bản XrayR"
+    echo "  XrayR By Aiko : Project XrayR by Aiko"
+    echo "  Project XrayR - https://github.com/AikoCute/XrayR "
+    echo "  XrayR release - https://github.com/AikoCute/XrayR-release"
+    echo "  XrayR docs    - https://xrayr.aikocute.com"
+    echo -e "  ${green}AikoCute Hột Me${plain} - https://aikocute.com"
     echo "------------------------------------------"
-    echo "Tập lệnh 1 cú pháp cài đặt XrayR"
-    echo "Facebook: Fb.com/pntuanhai"
-    echo "Lệnh config"
-    echo "vi /etc/XrayR/config.yml"
+    echo " "
+    
 }
 
+XrayR uninstall
+
+
 echo -e "${green}bắt đầu cài đặt${plain}"
+
 install_base
 install_acme
 install_XrayR $1
+
+echo -e "Đã lưu cấu hình thành công, đang bắt đầu khởi động ${green} AikoCute XrayR ${last_version}${plain}"
+
+
+
+XrayR start
