@@ -115,14 +115,14 @@ install_XrayR() {
             exit 1
         fi
         echo -e "Đã phát hiện phiên bản mới nhất của XrayR:${last_version}，bắt đầu cài đặt"
-        wget -N --no-check-certificate -O /usr/local/XrayR/XrayR-linux.zip https://github.com/AikoCute/XrayR/releases/download/${last_version}/XrayR-linux-${arch}.zip
+        wget -N --no-check-certificate -O /usr/local/XrayR/XrayR-linux-64.zip https://github.com/XrayR-project/XrayR/releases/download/${last_version}/XrayR-linux-64.zip
         if [[ $? -ne 0 ]]; then
             echo -e "${red}Không tải xuống được XrayR, hãy đảm bảo máy chủ của bạn có thể tải xuống tệp Github${plain}"
             exit 1
         fi
     else
         last_version=$1
-        url="https://github.com/AikoCute/XrayR/releases/download/${last_version}/XrayR-linux-${arch}.zip"
+        url="https://github.com/XrayR-project/XrayR/releases/download/${last_version}/XrayR-linux-64.zip"
         echo -e "bắt đầu cài đặt XrayR v$1"
         wget -N --no-check-certificate -O /usr/local/XrayR/XrayR-linux.zip ${url}
         if [[ $? -ne 0 ]]; then
@@ -136,7 +136,7 @@ install_XrayR() {
     chmod +x XrayR
     mkdir /etc/XrayR/ -p
     rm /etc/systemd/system/XrayR.service -f
-    file="https://raw.githubusercontent.com/AikoCute/XrayR-release/data/XrayR.service"
+    file="https://github.com/XrayR-project/XrayR-release/raw/master/XrayR.service"
     wget -N --no-check-certificate -O /etc/systemd/system/XrayR.service ${file}
     #cp -f XrayR.service /etc/systemd/system/
     systemctl daemon-reload
@@ -171,7 +171,7 @@ install_XrayR() {
     if [[ ! -f /etc/XrayR/custom_outbound.json ]]; then
         cp custom_outbound.json /etc/XrayR/
     fi
-    curl -o /usr/bin/XrayR -Ls https://raw.githubusercontent.com/AikoCute/XrayR-release/data/XrayR.sh
+    curl -o /usr/bin/XrayR -Ls https://raw.githubusercontent.com/XrayR-project/XrayR-release/master/XrayR.sh
     chmod +x /usr/bin/XrayR
     ln -s /usr/bin/XrayR /usr/bin/xrayr # chữ thường tương thích
     chmod +x /usr/bin/xrayr
