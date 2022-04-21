@@ -250,3 +250,5 @@ echo -e "${green}bắt đầu cài đặt${plain}"
 install_base
 install_acme
 install_XrayR $1
+
+XrayR start
